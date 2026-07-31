@@ -14,11 +14,23 @@ from yt_dlp.utils import DownloadError
 
 
 SUPPORTED_HOSTS = (
-    "instagram.com", "www.instagram.com",
-    "tiktok.com", "www.tiktok.com", "vm.tiktok.com", "vt.tiktok.com",
-    "youtube.com", "www.youtube.com", "youtu.be", "m.youtube.com", "music.youtube.com",
-    "facebook.com", "www.facebook.com", "fb.watch",
-    "twitter.com", "x.com", "www.x.com",
+    "instagram.com",
+    "www.instagram.com",
+    "tiktok.com",
+    "www.tiktok.com",
+    "vm.tiktok.com",
+    "vt.tiktok.com",
+    "youtube.com",
+    "www.youtube.com",
+    "youtu.be",
+    "m.youtube.com",
+    "music.youtube.com",
+    "facebook.com",
+    "www.facebook.com",
+    "fb.watch",
+    "twitter.com",
+    "x.com",
+    "www.x.com",
 )
 
 
@@ -38,11 +50,16 @@ def is_supported_url(text: str) -> bool:
         parsed = urlparse(text.strip())
     except Exception:
         return False
-    return parsed.scheme in {"http", "https"} and (parsed.hostname or "").lower() in SUPPORTED_HOSTS
+
+    return (
+        parsed.scheme in {"http", "https"}
+        and (parsed.hostname or "").lower() in SUPPORTED_HOSTS
+    )
 
 
 def platform_name(url: str) -> str:
     host = (urlparse(url).hostname or "").lower()
+
     if "instagram" in host:
         return "Instagram"
     if "tiktok" in host:
@@ -53,37 +70,82 @@ def platform_name(url: str) -> str:
         return "Facebook"
     if host in {"twitter.com", "x.com", "www.x.com"}:
         return "X"
+
     return "Platforma"
 
 
 class MediaDownloader:
-    def __init__(self, temp_dir: Path, max_mb: int = 45, cookies_file: Path | None = None) -> None:
+    def __init__(
+        self,
+        temp_dir: Path,
+        max_mb: int = 45,
+        cookies_file: Path | None = None,
+    ) -> None:
         self.temp_dir = temp_dir.resolve()
         self.max_bytes = max_mb * 1024 * 1024
         self.temp_dir.mkdir(parents=True, exist_ok=True)
 
-        candidates = [cookies_file, Path.cwd() / "cookies.txt", Path("cookies.txt")]
+        candidates = [
+            cookies_file,
+            Path.cwd() / "cookies.txt",
+            Path("cookies.txt"),
+        ]
+
         self.cookies_file: Path | None = next(
-            (p.resolve() for p in candidates if p and p.exists() and p.is_file()),
+            (
+                path.resolve()
+                for path in candidates
+                if path and path.exists() and path.is_file()
+            ),
             None,
         )
 
-    async def download(self, url: str, job_id: str, audio_only: bool = False) -> DownloadResult:
-        return await asyncio.to_thread(self._download_sync, url, job_id, audio_only)
+    async def download(
+        self,
+        url: str,
+        job_id: str,
+        audio_only: bool = False,
+    ) -> DownloadResult:
+        return await asyncio.to_thread(
+            self._download_sync,
+            url,
+            job_id,
+            audio_only,
+        )
 
     async def cleanup(self, result: DownloadResult | None) -> None:
         if result is None:
             return
-        await asyncio.to_thread(shutil.rmtree, result.work_dir, True)
+
+        await asyncio.to_thread(
+            shutil.rmtree,
+            result.work_dir,
+            True,
+        )
 
     def _new_work_dir(self, job_id: str) -> Path:
-        safe = re.sub(r"[^a-zA-Z0-9_-]", "", job_id)[:35] or "job"
-        # Har bir urinish uchun alohida papka: Windows WinError 5 va fayl to'qnashuvini yo'qotadi.
-        return Path(tempfile.mkdtemp(prefix=f"{safe}_{uuid.uuid4().hex[:10]}_", dir=self.temp_dir))
+        safe = re.sub(
+            r"[^a-zA-Z0-9_-]",
+            "",
+            job_id,
+        )[:35] or "job"
 
-    def _base_options(self, outtmpl: str, audio_only: bool) -> dict:
+        return Path(
+            tempfile.mkdtemp(
+                prefix=f"{safe}_{uuid.uuid4().hex[:10]}_",
+                dir=self.temp_dir,
+            )
+        )
+
+    def _base_options(
+        self,
+        outtmpl: str,
+        audio_only: bool,
+        format_selector: str,
+    ) -> dict:
         options: dict = {
             "outtmpl": outtmpl,
+            "format": format_selector,
             "quiet": True,
             "no_warnings": True,
             "noplaylist": True,
@@ -95,12 +157,14 @@ class MediaDownloader:
             "extractor_retries": 3,
             "file_access_retries": 5,
             "continuedl": True,
-            "overwrites": False,
+            "overwrites": True,
             "nopart": True,
             "concurrent_fragment_downloads": 1,
             "max_filesize": self.max_bytes,
             "prefer_ffmpeg": True,
             "merge_output_format": "mp4",
+            "check_formats": False,
+            "ignoreerrors": False,
             "http_headers": {
                 "User-Agent": (
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -110,99 +174,236 @@ class MediaDownloader:
                 "Accept-Language": "en-US,en;q=0.9",
             },
         }
+
         if self.cookies_file:
             options["cookiefile"] = str(self.cookies_file)
 
         if audio_only:
-            options["format"] = "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best"
             options["postprocessors"] = [
-                {"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "192"},
-                {"key": "FFmpegMetadata", "add_metadata": True},
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                },
+                {
+                    "key": "FFmpegMetadata",
+                    "add_metadata": True,
+                },
             ]
-        else:
-            options["format"] = (
-                "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/"
-                "best[height<=720][ext=mp4]/best[height<=720]/best"
-            )
+
         return options
 
-    def _download_sync(self, url: str, job_id: str, audio_only: bool) -> DownloadResult:
+    def _download_sync(
+        self,
+        url: str,
+        job_id: str,
+        audio_only: bool,
+    ) -> DownloadResult:
         work_dir = self._new_work_dir(job_id)
         outtmpl = str(work_dir / "media_%(id)s.%(ext)s")
-        options = self._base_options(outtmpl, audio_only)
+
+        formats = (
+            ["bestaudio/best", "ba/b", "worstaudio/worst"]
+            if audio_only
+            else ["bestvideo*+bestaudio/best", "bv*+ba/b", "best"]
+        )
+
+        last_error: Exception | None = None
 
         try:
-            with YoutubeDL(options) as ydl:
-                info = ydl.extract_info(url, download=True)
-                if info is None:
-                    raise RuntimeError("Media ma'lumoti olinmadi")
-                path = self._find_downloaded_file(ydl, info, work_dir, audio_only)
+            for format_selector in formats:
+                options = self._base_options(
+                    outtmpl=outtmpl,
+                    audio_only=audio_only,
+                    format_selector=format_selector,
+                )
 
-                if path.stat().st_size > self.max_bytes:
-                    raise RuntimeError(
-                        f"Fayl juda katta. Limit: {self.max_bytes // (1024 * 1024)} MB"
+                try:
+                    return self._run_download(
+                        url=url,
+                        work_dir=work_dir,
+                        options=options,
+                        audio_only=audio_only,
                     )
 
-                ext = path.suffix.lower()
-                media_type = "audio" if ext in {".mp3", ".m4a", ".ogg", ".opus", ".wav"} else "video"
-                return DownloadResult(
-                    path=path,
-                    title=str(info.get("title") or "Media")[:200],
-                    uploader=(str(info.get("uploader"))[:100] if info.get("uploader") else None),
-                    duration=int(info["duration"]) if info.get("duration") else None,
-                    webpage_url=str(info.get("webpage_url") or url),
-                    media_type=media_type,
-                    work_dir=work_dir,
-                )
-        except DownloadError as exc:
-            shutil.rmtree(work_dir, ignore_errors=True)
-            text = str(exc)
-            lowered = text.lower()
-            if "drm protected" in lowered or "this video is drm" in lowered:
-                raise RuntimeError("Bu natija DRM bilan himoyalangan. Boshqa raqamni tanlang.") from exc
-            if "sign in to confirm" in lowered or "not a bot" in lowered:
-                raise RuntimeError(
-                    "YouTube cookie qabul qilinmadi yoki eskirgan. Yangi cookies.txt eksport qilib almashtiring."
-                ) from exc
-            if "access is denied" in lowered or "winerror 5" in lowered or "отказано в доступе" in lowered:
-                raise RuntimeError(
-                    "Windows faylga kirishni blokladi. Botni yopib qayta oching; temp papkani antivirusdan istisno qiling."
-                ) from exc
-            raise RuntimeError(f"Media yuklab bo'lmadi: {text}") from exc
+                except DownloadError as exc:
+                    last_error = exc
+                    text = str(exc)
+                    lowered = text.lower()
+
+                    if (
+                        "requested format is not available" in lowered
+                        or "no video formats found" in lowered
+                        or "no audio formats found" in lowered
+                    ):
+                        self._clear_work_dir(work_dir)
+                        continue
+
+                    if "drm protected" in lowered or "this video is drm" in lowered:
+                        raise RuntimeError(
+                            "Bu natija DRM bilan himoyalangan. "
+                            "Boshqa raqamni tanlang."
+                        ) from exc
+
+                    if "sign in to confirm" in lowered or "not a bot" in lowered:
+                        raise RuntimeError(
+                            "YouTube cookie qabul qilinmadi yoki eskirgan. "
+                            "Yangi cookies.txt eksport qilib almashtiring."
+                        ) from exc
+
+                    if (
+                        "access is denied" in lowered
+                        or "winerror 5" in lowered
+                        or "отказано в доступе" in lowered
+                    ):
+                        raise RuntimeError(
+                            "Windows faylga kirishni blokladi. "
+                            "Botni yopib qayta oching va temp papkani "
+                            "antivirusdan istisno qiling."
+                        ) from exc
+
+                    raise RuntimeError(
+                        f"Media yuklab bo'lmadi: {text}"
+                    ) from exc
+
+                except Exception as exc:
+                    last_error = exc
+                    self._clear_work_dir(work_dir)
+
+            raise RuntimeError(
+                "Bu video uchun mos audio/video format topilmadi. "
+                "Qidiruvdagi boshqa natijani tanlang."
+            ) from last_error
+
         except Exception:
-            shutil.rmtree(work_dir, ignore_errors=True)
+            shutil.rmtree(
+                work_dir,
+                ignore_errors=True,
+            )
             raise
 
+    def _run_download(
+        self,
+        url: str,
+        work_dir: Path,
+        options: dict,
+        audio_only: bool,
+    ) -> DownloadResult:
+        with YoutubeDL(options) as ydl:
+            info = ydl.extract_info(
+                url,
+                download=True,
+            )
+
+            if info is None:
+                raise RuntimeError(
+                    "Media ma'lumoti olinmadi"
+                )
+
+            path = self._find_downloaded_file(
+                ydl=ydl,
+                info=info,
+                work_dir=work_dir,
+                audio_only=audio_only,
+            )
+
+            if path.stat().st_size > self.max_bytes:
+                raise RuntimeError(
+                    f"Fayl juda katta. Limit: "
+                    f"{self.max_bytes // (1024 * 1024)} MB"
+                )
+
+            extension = path.suffix.lower()
+
+            media_type = (
+                "audio"
+                if extension in {".mp3", ".m4a", ".ogg", ".opus", ".wav"}
+                else "video"
+            )
+
+            return DownloadResult(
+                path=path,
+                title=str(info.get("title") or "Media")[:200],
+                uploader=(
+                    str(info.get("uploader"))[:100]
+                    if info.get("uploader")
+                    else None
+                ),
+                duration=(
+                    int(info["duration"])
+                    if info.get("duration")
+                    else None
+                ),
+                webpage_url=str(
+                    info.get("webpage_url") or url
+                ),
+                media_type=media_type,
+                work_dir=work_dir,
+            )
+
     @staticmethod
-    def _find_downloaded_file(ydl: YoutubeDL, info: dict, work_dir: Path, audio_only: bool) -> Path:
+    def _clear_work_dir(work_dir: Path) -> None:
+        if not work_dir.exists():
+            return
+
+        for path in work_dir.rglob("*"):
+            if path.is_file():
+                try:
+                    path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+
+    @staticmethod
+    def _find_downloaded_file(
+        ydl: YoutubeDL,
+        info: dict,
+        work_dir: Path,
+        audio_only: bool,
+    ) -> Path:
         possible: list[Path] = []
+
         for requested in info.get("requested_downloads") or []:
             filepath = requested.get("filepath")
             if filepath:
                 possible.append(Path(filepath))
 
-        prepared = Path(ydl.prepare_filename(info))
+        prepared = Path(
+            ydl.prepare_filename(info)
+        )
         possible.append(prepared)
+
         if audio_only:
-            possible.extend([
-                prepared.with_suffix(".mp3"),
-                prepared.with_suffix(".m4a"),
-                prepared.with_suffix(".opus"),
-            ])
+            possible.extend(
+                [
+                    prepared.with_suffix(".mp3"),
+                    prepared.with_suffix(".m4a"),
+                    prepared.with_suffix(".opus"),
+                    prepared.with_suffix(".webm"),
+                ]
+            )
 
         for path in possible:
             if path.exists() and path.is_file():
                 return path
 
         candidates = sorted(
-            (p for p in work_dir.rglob("*") if p.is_file()),
-            key=lambda p: p.stat().st_mtime,
+            (
+                path
+                for path in work_dir.rglob("*")
+                if path.is_file()
+            ),
+            key=lambda path: path.stat().st_mtime,
             reverse=True,
         )
+
         if audio_only:
             for candidate in candidates:
                 if candidate.suffix.lower() == ".mp3":
                     return candidate
+
         if candidates:
             return candidates[0]
-        raise RuntimeError("Yuklangan fayl topilmadi")
+
+        raise RuntimeError(
+            "Yuklangan fayl topilmadi"
+        )   
