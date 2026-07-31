@@ -1,0 +1,5 @@
+MusicFinderBot V18 MINI APP
+- Telegram Mini App
+- Search, favorites, history, profile
+- FastAPI web server
+- Telegram initData validation
