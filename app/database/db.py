@@ -230,7 +230,6 @@ class Database:
             )).fetchone())[0])
         return {"searches": searches, "favorites": favorites, "library": library}
 
-<<<<<<< HEAD
     async def admin_dashboard(self) -> dict[str, Any]:
         async with aiosqlite.connect(self.path) as db:
             async def count(sql: str, params: tuple = ()) -> int:
@@ -349,8 +348,6 @@ class Database:
             "activity": [{"action": r[0], "query": r[1], "created_at": r[2]} for r in activity],
         }
 
-=======
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
     async def all_user_ids(self) -> list[int]:
         async with aiosqlite.connect(self.path) as db:
             cur = await db.execute("SELECT user_id FROM users")
