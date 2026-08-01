@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#080a12" />
+  <title>Music Finder</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="aurora aurora-one"></div>
+  <div class="aurora aurora-two"></div>
+
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand-mark">M</div>
+      <div class="brand-copy">
+        <strong>Music Finder</strong>
+        <span id="connectionLabel">Telegram bilan ulanmoqda…</span>
+      </div>
+      <button id="closeButton" class="icon-button" aria-label="Yopish">✕</button>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">PREMIUM MUSIC HUB</span>
+        <h1>Istalgan musiqani tez toping.</h1>
+        <p>Qidiruv, sevimlilar va tinglash tarixingiz — barchasi bir joyda.</p>
+      </div>
+      <div class="vinyl" aria-hidden="true"><div></div></div>
+    </section>
+
+    <section class="search-panel">
+      <label class="search-box" for="searchInput">
+        <span>⌕</span>
+        <input id="searchInput" type="search" placeholder="Qo‘shiq yoki ijrochi…" autocomplete="off" />
+        <button id="searchButton" type="button">Topish</button>
+      </label>
+      <div id="searchHint" class="status-line" aria-live="polite">Masalan: Miyagi, Eminem, Akon</div>
+    </section>
+
+    <section id="homeView" class="view active">
+      <div class="stats-grid">
+        <article class="stat-card"><span>Qidiruvlar</span><strong id="searchCount">0</strong><small>jami</small></article>
+        <article class="stat-card"><span>Sevimlilar</span><strong id="favoriteCount">0</strong><small>saqlangan</small></article>
+        <article class="stat-card"><span>Kutubxona</span><strong id="libraryCount">0</strong><small>trek</small></article>
+      </div>
+
+      <div class="section-title"><h2>Tezkor janrlar</h2><span>Bir tegishda qidiring</span></div>
+      <div class="chips" id="quickChips">
+        <button data-query="uzbek music">O‘zbekcha</button>
+        <button data-query="russian hits">Ruscha</button>
+        <button data-query="hip hop official audio">Hip-Hop</button>
+        <button data-query="pop hits official audio">Pop</button>
+      </div>
+
+      <div class="section-title"><h2>Oxirgi harakatlar</h2><button class="text-button" data-tab="history">Barchasi</button></div>
+      <div id="recentList" class="track-list empty-state">Tarix yuklanmoqda…</div>
+    </section>
+
+    <section id="searchView" class="view">
+      <div class="section-title"><h2>Qidiruv natijalari</h2><span id="resultMeta"></span></div>
+      <div id="resultList" class="track-list empty-state">Yuqoridan qo‘shiq qidiring.</div>
+    </section>
+
+    <section id="favoritesView" class="view">
+      <div class="section-title"><h2>Sevimlilar</h2><span id="favoriteMeta"></span></div>
+      <div id="favoritesList" class="track-list empty-state">Sevimlilar yuklanmoqda…</div>
+    </section>
+
+    <section id="historyView" class="view">
+      <div class="section-title"><h2>Tarix</h2><span id="historyMeta"></span></div>
+      <div id="historyList" class="track-list empty-state">Tarix yuklanmoqda…</div>
+    </section>
+
+
+    <section id="adminView" class="view">
+      <div class="admin-head">
+        <div><span class="eyebrow">OWNER CONTROL</span><h2>Admin panel</h2><p>Barcha foydalanuvchilar va real statistikani shu yerdan ko‘rasiz.</p></div>
+        <button id="adminRefresh" class="icon-button" type="button" aria-label="Yangilash">↻</button>
+      </div>
+
+      <div class="admin-metrics">
+        <article class="metric-tile"><span>Jami user</span><strong id="adminUsers">0</strong><small id="adminNewToday">Bugun +0</small></article>
+        <article class="metric-tile"><span>24 soat faol</span><strong id="adminActiveToday">0</strong><small id="adminActiveWeek">7 kun: 0</small></article>
+        <article class="metric-tile"><span>Qidiruvlar</span><strong id="adminSearches">0</strong><small id="adminSearchesToday">Bugun: 0</small></article>
+        <article class="metric-tile"><span>Harakatlar</span><strong id="adminHistory">0</strong><small id="adminHistoryToday">Bugun: 0</small></article>
+        <article class="metric-tile"><span>Sevimlilar</span><strong id="adminFavorites">0</strong><small>jami saqlangan</small></article>
+        <article class="metric-tile"><span>Kutubxona</span><strong id="adminLibrary">0</strong><small>treklar</small></article>
+      </div>
+
+      <div class="section-title"><h2>Yangi foydalanuvchilar</h2><span id="adminUsersMeta">0 ta</span></div>
+      <label class="admin-filter" for="adminUserFilter">
+        <span>⌕</span><input id="adminUserFilter" type="search" placeholder="ID, ism yoki @username..." autocomplete="off" />
+      </label>
+      <div id="adminUsersList" class="user-list empty-state">Yuklanmoqda…</div>
+
+      <div class="section-title"><h2>Top qidiruvlar</h2><span>eng ko‘p yozilgan</span></div>
+      <div id="adminQueries" class="query-list empty-state">Ma’lumot yuklanmoqda…</div>
+
+      <div class="section-title"><h2>Oxirgi faoliyat</h2><span>real vaqtga yaqin</span></div>
+      <div id="adminActivity" class="activity-list empty-state">Ma’lumot yuklanmoqda…</div>
+    </section>
+
+    <section id="profileView" class="view">
+      <div class="profile-card">
+        <div id="profileAvatar" class="profile-avatar">M</div>
+        <div><h2 id="profileName">Telegram user</h2><p id="profileUsername">@username</p></div>
+      </div>
+      <div class="profile-menu">
+        <div><span>Telegram ID</span><strong id="profileId">—</strong></div>
+        <div><span>Bot bilan qidiruvlar</span><strong id="profileSearches">0</strong></div>
+        <div><span>Saqlangan treklar</span><strong id="profileFavorites">0</strong></div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Asosiy navigatsiya">
+    <button class="nav-item active" data-tab="home"><span>⌂</span><small>Bosh sahifa</small></button>
+    <button class="nav-item" data-tab="search"><span>⌕</span><small>Qidiruv</small></button>
+    <button class="nav-item" data-tab="favorites"><span>♡</span><small>Sevimlilar</small></button>
+    <button class="nav-item" data-tab="history"><span>◷</span><small>Tarix</small></button>
+    <button id="adminNav" class="nav-item admin-nav hidden" data-tab="admin"><span>♛</span><small>Admin</small></button>
+    <button class="nav-item" data-tab="profile"><span>◉</span><small>Profil</small></button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/app.js"></script>
+</body>
+</html>
