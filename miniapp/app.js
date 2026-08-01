@@ -6,11 +6,7 @@ if (tg) {
   tg.setBackgroundColor?.('#080a12');
 }
 
-<<<<<<< HEAD
 const state = { me: null, results: [], favorites: [], history: [], admin: null };
-=======
-const state = { me: null, results: [], favorites: [], history: [] };
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
 const $ = (id) => document.getElementById(id);
 const initData = tg?.initData || '';
 
@@ -75,17 +71,13 @@ function renderTracks(target, tracks, empty, favoriteMode = false) {
 }
 
 function setTab(tab) {
-<<<<<<< HEAD
   if (tab === 'admin' && !state.me?.is_admin) return;
-=======
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
   document.querySelectorAll('.view').forEach((view) => view.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach((button) => button.classList.toggle('active', button.dataset.tab === tab));
   const view = $(`${tab}View`);
   if (view) view.classList.add('active');
 }
 
-<<<<<<< HEAD
 function adminUserRow(user) {
   const name = user.full_name || 'Telegram user';
   const username = user.username ? `@${user.username}` : 'username yo‘q';
@@ -161,8 +153,6 @@ async function loadAdmin() {
   }
 }
 
-=======
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
 async function loadMe() {
   if (!initData) {
     $('connectionLabel').textContent = 'Mini App’ni Telegram ichida oching';
@@ -174,11 +164,8 @@ async function loadMe() {
     state.me = data;
     state.favorites = data.favorites || [];
     state.history = data.history || [];
-<<<<<<< HEAD
     $('adminNav').classList.toggle('hidden', !data.is_admin);
     document.querySelector('.bottom-nav').style.gridTemplateColumns = data.is_admin ? 'repeat(6, 1fr)' : 'repeat(5, 1fr)';
-=======
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
     const user = data.user || {};
     const profile = data.profile || {};
     $('connectionLabel').textContent = `Salom, ${user.first_name || 'do‘stim'}`;
@@ -197,10 +184,7 @@ async function loadMe() {
     const historyTracks = state.history.map((item) => item.track).filter(Boolean);
     renderTracks('historyList', historyTracks, 'Tarix hozircha bo‘sh.');
     renderTracks('recentList', historyTracks.slice(0, 4), 'Tarix hozircha bo‘sh.');
-<<<<<<< HEAD
     if (data.is_admin) loadAdmin();
-=======
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
   } catch (error) {
     $('connectionLabel').textContent = 'Ulanishda xato';
     toast(error.message);
@@ -235,14 +219,10 @@ $('closeButton').addEventListener('click', () => tg?.close());
 
 document.addEventListener('click', async (event) => {
   const tabButton = event.target.closest('[data-tab]');
-<<<<<<< HEAD
   if (tabButton) {
     setTab(tabButton.dataset.tab);
     if (tabButton.dataset.tab === 'admin') loadAdmin();
   }
-=======
-  if (tabButton) setTab(tabButton.dataset.tab);
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
 
   const chip = event.target.closest('[data-query]');
   if (chip) {
@@ -264,7 +244,6 @@ document.addEventListener('click', async (event) => {
   }
 });
 
-<<<<<<< HEAD
 
 $('adminRefresh')?.addEventListener('click', loadAdmin);
 $('adminUserFilter')?.addEventListener('input', (event) => {
@@ -279,6 +258,4 @@ $('adminUserFilter')?.addEventListener('input', (event) => {
   renderAdminUsers(filtered);
 });
 
-=======
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
 loadMe();

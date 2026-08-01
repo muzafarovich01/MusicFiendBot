@@ -1,9 +1,1 @@
-<<<<<<< HEAD
 V19 MINI APP ADMIN DASHBOARD
-=======
-MusicFinderBot V18 MINI APP
-- Telegram Mini App
-- Search, favorites, history, profile
-- FastAPI web server
-- Telegram initData validation
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd

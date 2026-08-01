@@ -64,7 +64,6 @@ BotFather orqali doimiy Menu Button qo‘yish uchun:
 2. botni tanlang → `Bot Settings`
 3. `Menu Button` → `Configure menu button`
 4. hostingdagi `MINI_APP_URL` manzilini kiriting.
-<<<<<<< HEAD
 
 
 ## V19 Admin Mini App
@@ -73,5 +72,3 @@ BotFather orqali doimiy Menu Button qo‘yish uchun:
 - Jami userlar, bugungi yangi userlar, 24 soat/7 kun faollar, qidiruvlar, harakatlar, sevimlilar va kutubxona statistikasi.
 - Oxirgi 100 foydalanuvchi, top qidiruvlar va oxirgi faoliyat.
 - Yangi user `/start` bosganda yoki Mini Appni ochganda avtomatik ro‘yxatga tushadi.
-=======
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
