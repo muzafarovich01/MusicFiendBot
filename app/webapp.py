@@ -105,10 +105,7 @@ def create_web_app(
             "user": user,
             "profile": profile,
             "favorites": [_track_dict(track) for track in favorites],
-<<<<<<< HEAD
             "is_admin": user_id in settings.admin_ids,
-=======
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
             "history": [
                 {
                     "action": row["action"],
@@ -159,7 +156,6 @@ def create_web_app(
         added = await db.toggle_favorite(int(user["id"]), Track(**payload.model_dump()))
         return {"added": added}
 
-<<<<<<< HEAD
 
     @app.get("/api/admin/dashboard")
     async def admin_dashboard(x_telegram_init_data: str | None = Header(default=None)) -> dict:
@@ -182,6 +178,4 @@ def create_web_app(
             raise HTTPException(status_code=404, detail="Foydalanuvchi topilmadi")
         return result
 
-=======
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
     return app

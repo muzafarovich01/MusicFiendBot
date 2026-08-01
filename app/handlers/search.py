@@ -133,29 +133,16 @@ async def pick_result(
 ) -> None:
     try:
         _, token, raw_index = callback.data.split(":", 2)
-<<<<<<< HEAD
         selected_index = int(raw_index)
         track = decode_search(token, selected_index)
-=======
-        track = decode_search(token, int(raw_index))
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
     except Exception:
         await callback.answer("Qidiruv eskirgan. Qaytadan qidiring.", show_alert=True)
         return
 
     await callback.answer("Tanlandi")
 
-<<<<<<< HEAD
     try:
         if track.source != "spotify" and spotify:
-=======
-    # Natijani Spotify kutmasdan chiqarish muhim. Spotify sekin yoki xato bo'lsa,
-    # oldingi versiyada callback faqat “Tanlandi” deb qolib ketardi.
-    try:
-        if track.source == "spotify":
-            pass
-        elif spotify:
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
             import asyncio
             await asyncio.wait_for(enrich_spotify(track, spotify), timeout=8)
     except Exception:
@@ -179,13 +166,9 @@ async def pick_result(
                 caption=f"🎵 <b>{html.escape(track.title)}</b>\n👤 {html.escape(track.artist)}",
                 reply_markup=markup,
             )
-<<<<<<< HEAD
             return
 
         if track.local_path and Path(track.local_path).is_file():
-=======
-        elif track.local_path and Path(track.local_path).is_file():
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
             sent = await callback.message.answer_audio(
                 audio=FSInputFile(track.local_path),
                 title=track.title,
@@ -193,7 +176,6 @@ async def pick_result(
                 caption=f"🎵 <b>{html.escape(track.title)}</b>\n👤 {html.escape(track.artist)}",
                 reply_markup=markup,
             )
-<<<<<<< HEAD
             if sent.audio:
                 track.telegram_file_id = sent.audio.file_id
                 await db.add_music(track, Path(track.local_path).name)
@@ -217,27 +199,10 @@ async def pick_result(
         candidates = [item for item in candidates if item.youtube_url][:6]
 
         if candidates:
-=======
-            # Keyingi yuborishlar tez bo'lishi uchun Telegram file_id ni bazaga saqlaymiz.
-            if sent.audio:
-                track.telegram_file_id = sent.audio.file_id
-                await db.add_music(track, Path(track.local_path).name)
-        elif track.youtube_url:
-            cached = await db.get_cached_track(track)
-            if cached and cached.telegram_file_id:
-                await callback.message.answer_audio(
-                    audio=cached.telegram_file_id, title=track.title, performer=track.artist,
-                    caption=f"⚡ <b>{html.escape(track.title)}</b>\n👤 {html.escape(track.artist)}\n\nKeshdan tez yuborildi.",
-                    reply_markup=markup,
-                )
-                return
-
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
             position = await task_manager.position()
             progress = await callback.message.answer(
                 f"⏳ Navbatdagi o‘rningiz: <b>{position}</b>\n🎧 Qo‘shiq tayyorlanmoqda…"
             )
-<<<<<<< HEAD
 
             last_error: Exception | None = None
 
@@ -357,54 +322,6 @@ async def pick_result(
         logger.exception("Could not send selected track")
         await callback.message.answer(
             "❌ Natijani chiqarishda xato bo‘ldi. Qaytadan qidirib ko‘ring.\n"
-=======
-            result = None
-            job_key = track.youtube_url
-            try:
-                async with await task_manager.enter(job_key):
-                    # Shu qo‘shiqni boshqa foydalanuvchi kutish vaqtida tayyorlagan bo‘lishi mumkin.
-                    cached = await db.get_cached_track(track)
-                    if cached and cached.telegram_file_id:
-                        await callback.message.answer_audio(
-                            audio=cached.telegram_file_id, title=track.title, performer=track.artist,
-                            caption=f"⚡ <b>{html.escape(track.title)}</b>\n👤 {html.escape(track.artist)}",
-                            reply_markup=markup,
-                        )
-                        await progress.delete()
-                        return
-                    await progress.edit_text("⬇️ Yuklanmoqda…\n████░░░░░░ 40%")
-                    result = await downloader.download(
-                        track.youtube_url, f"track_{callback.from_user.id}_{callback.id}", audio_only=True,
-                    )
-                    await progress.edit_text("📤 Telegram’ga yuborilmoqda…\n████████░░ 80%")
-                    sent = await callback.message.answer_audio(
-                        audio=FSInputFile(result.path),
-                        title=track.title or result.title,
-                        performer=track.artist or result.uploader or "Noma’lum ijrochi",
-                        duration=result.duration,
-                        caption=(
-                            f"🎵 <b>{html.escape(track.title or result.title)}</b>\n"
-                            f"👤 {html.escape(track.artist or result.uploader or 'Noma’lum ijrochi')}\n\n"
-                            "❤️ Sevimlilarga saqlashingiz mumkin."
-                        ),
-                        reply_markup=markup,
-                    )
-                    if sent.audio:
-                        track.telegram_file_id = sent.audio.file_id
-                        await db.add_music(track, f"youtube_{sent.audio.file_unique_id}.mp3")
-                    await progress.delete()
-            finally:
-                try:
-                    await downloader.cleanup(result)
-                except Exception:
-                    logger.exception("Could not remove temporary audio work directory")
-        else:
-            await callback.message.answer(text, reply_markup=markup)
-    except Exception as exc:
-        logger.exception("Could not send selected track")
-        await callback.message.answer(
-            "❌ Natijani chiqarishda xato bo'ldi. Qaytadan qidirib ko'ring.\n"
->>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
             f"<code>{html.escape(str(exc)[:250])}</code>"
         )
 
