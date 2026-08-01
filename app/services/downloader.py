@@ -406,4 +406,8 @@ class MediaDownloader:
 
         raise RuntimeError(
             "Yuklangan fayl topilmadi"
+<<<<<<< HEAD
         )
+=======
+        )   
+>>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd

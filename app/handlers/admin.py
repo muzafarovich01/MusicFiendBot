@@ -4,7 +4,11 @@ import asyncio
 
 from aiogram import Router
 from aiogram.filters import Command, CommandObject
+<<<<<<< HEAD
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+=======
+from aiogram.types import Message
+>>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
 
 from app.config import Settings
 from app.database.db import Database
@@ -71,6 +75,7 @@ async def status(message: Message, settings: Settings, task_manager: TaskManager
         f"Navbatda: <b>{task_manager.waiting}</b>\n"
         f"Parallel limit: <b>{settings.max_parallel_downloads}</b>\n\n" + system
     )
+<<<<<<< HEAD
 
 
 @router.message(Command("adminapp"))
@@ -90,3 +95,5 @@ async def adminapp(message: Message, settings: Settings) -> None:
         "<b>👑 Music Finder Admin</b>\n\nFoydalanuvchilar va statistikani ko‘rish:",
         reply_markup=markup,
     )
+=======
+>>>>>>> 62099b501c3b233b74dc679cd52b2d63cf3c34bd
